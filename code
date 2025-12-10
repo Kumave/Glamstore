@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tienda de Relojes</title>
+  <style>
+    :root{
+      --pastel-azul:#f0d1e4;
+      --pastel-amarillo:#f7e1ef;
+      --pastel-rosa:#ffd6e7;
+      --card-bg:linear-gradient(135deg,var(--pastel-azul),var(--pastel-rosa));
+      --glass:rgba(255,255,255,0.72);
+      --texto:#2b3440;
+      --radio:14px;
+      --sombra:0 8px 24px rgba(43,52,64,0.08);
+      --accent:#7aa7ff;
+      --accent-2:#ff9ac1;
+      --gold:#c59b6a;
+      --transition:240ms cubic-bezier(.2,.9,.3,1);
+    }
+    *{box-sizing:border-box}
+html,body{height:100%;font-family:Inter,system-ui,Arial;
+margin:0;
+background:linear-gradient(180deg,#fbfcff 0%, #f5d5e6 60%);
+color:var(--texto)}
+    header{position:
+sticky;
+top:0;
+background:transparent;
+padding:12px 20px;
+backdrop-filter: blur(6px);
+display:flex;
+align-items:center;
+justify-content:space-between;z-index:40}
+    .logo{display:flex;
+align-items:center;gap:12px}
+.logo img{width:48px;
+height:48px;
+border-radius:10px;
+box-shadow:var(--sombra)}nav ul{display:flex;gap:12px;
+list-style:none;
+margin:0;
+padding:0}nav a{padding:8px 12px;
+border-radius:10px;
+background:var(--glass);
+text-decoration:none;
+color:var(--texto);
+transition:all var(--transition)}nav a:hover{transform:translateY(-3px);
+box-shadow:var(--sombra)}
+    .layout{max-width:1200px;
+margin:18px auto;
+padding:0 18px;
+display:grid;
+grid-template-columns:320px 1fr;
+gap:18px}
+    .sidebar{background:var(--card-bg);
+padding:14px;
+border-radius:16px;
+box-shadow:var(--sombra);
+min-height:420px}
+.sidebar h3{margin:0 0 12px;
+font-size:18px}.
+filter-group{background:rgba(255,255,255,0.6);
+padding:10px;
+border-radius:12px;
+margin-bottom:12px}
+.filter-group label{display:flex;align-items:center;
+gap:8px;font-size:14px}
+    .main-head{display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+margin-bottom:12px}
+.search{display:flex;
+align-items:center;
+gap:8px;background:var(--glass);
+padding:8px;border-radius:12px}
+.search input{border:none;background:transparent;
+outline:none;font-size:15px}
+    .grid{display:grid;
+grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+gap:14px}
+.card{background:white;
+border-radius:12px;
+padding:12px;
+box-shadow:var(--sombra);
+transition:transform var(--transition)}
+.card:hover{transform:translateY(-6px)}
+.thumb{height:140px;
+border-radius:10px;
+overflow:hidden;
+display:flex;
+align-items:center;
+justify-content:center}
+.thumb img{max-width:100%;
+height:100%;
+object-fit:cover}
+.card h4{margin:10px 0 6px;
+font-size:15px}
+.card 
+.meta{display:flex;
+justify-content:space-between;
+align-items:center}
+.btn{padding:8px 12px;
+border-radius:10px;
+border:none;
+background:var(--accent);
+color:#fff;
+cursor:pointer}
+    .viewer-wrap{display:grid;
+grid-template-columns:1fr 340px;
+gap:12px}
+.viewer{background:var(--glass);
+border-radius:12px;
+padding:12px;
+display:flex;
+flex-direction:column;
+gap:10px;
+align-items:center;
+justify-content:center}
+#visor3D{width:380px;
+height:380px;
+border-radius:12px;
+background:linear-gradient(180deg,#eefaff,#fff);
+box-shadow:inset 0 6px 24px rgba(0,0,0,0.03)}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+.small{font-size:13px;padding:6px 8px}
+    .movements{display:flex;gap:8px}
+.movement{flex:1;padding:10px;
+border-radius:10px;
+background:linear-gradient(90deg,rgba(255,255,255,0.9),rgba(255,255,255,0.7));
+text-align:center}
+    .chart-card{padding:12px;border-radius:12px;
+background:var(--glass)}#certCanvas{display:none}
+    .wrist-meter{padding:12px;border-radius:12px;
+background:linear-gradient(90deg,var(--pastel-amarillo),#fff);
+display:flex;flex-direction:column;gap:10px}
+    .favorite{background:transparent;border:none;
+font-size:18px;cursor:pointer;transition:transform .2s}
+    .favorite.pop{transform:scale(1.25);transition:transform .18s}
+    .stars{display:inline-flex;gap:4px;cursor:pointer}
+    .star{font-size:18px;color:#ddd}
+    .star.on{color:#ffbf00}
+    .tiny{font-size:13px;color:#6b7280}
+    .dialog{position:fixed;
+left:50%;top:50%;transform:translate(-50%,-50%);
+background:white;padding:12px;border-radius:12px;box-shadow:var(--sombra);z-index:9999}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:999}
+    input[type="range"]{accent-color:var(--accent)}
+    @media (max-width:980px){.layout{grid-template-columns:1fr}
+.viewer-wrap{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="https://i.pinimg.com/736x/b8/7b/27/b87b27c1d4b3da589f8bbc40669776dd.jpg" alt="logo"/>
+      <div>
+        <strong>GlamStore</strong><br /><small class="tiny">Relojes de Lujo</small>
+      </div>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#">Inicio</a></li>
+        <li><a href="#catalogo">Catálogo</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </nav>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="search"><input id="busqueda" placeholder="Buscar... (ej: Rolex)"/></div>
+      <button class="btn" id="ver-carrito">🛒 <span id="badge">0</span></button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <h3>Filtros</h3>
+      <div class="filter-group">
+        <strong>Marca</strong>
+        <div><label><input type="checkbox" data-filter="marca" value="Rolex"/> Rolex</label></div>
+        <div><label><input type="checkbox" data-filter="marca" value="Omega"/> Omega</label></div>
+        <div><label><input type="checkbox" data-filter="marca" value="Cartier"/> Cartier</label></div>
+      </div>
+      <div class="filter-group">
+        <strong>Movimiento</strong>
+        <label><input type="radio" name="mov" value="all" checked/> Todos</label>
+        <label><input type="radio" name="mov" value="automático"/> Automático</label>
+        <label><input type="radio" name="mov" value="mecánico"/> Mecánico</label>
+        <label><input type="radio" name="mov" value="cuarzo"/> Cuarzo</label>
+      </div>
+      <div class="filter-group">
+        <strong>Año</strong>
+        <input type="range" id="yearRange" min="1950" max="2025" value="2025"/>
+        <div class="tiny" style="margin-top:6px">Hasta: <span id="yearVal">2025</span></div>
+      </div>
+      <div class="filter-group">
+        <button class="btn" id="limpiar-filtros">Limpiar filtros</button>
+      </div>
+      <hr />
+      <h3>Autenticidad</h3>
+      <div class="filter-group">
+        <label>Número de serie<br/><input id="inputSerial" placeholder="ES-12345678"/></label>
+        <button id="verificarSerial" class="btn small">Verificar</button>
+        <div id="serialResult" class="tiny" style="margin-top:8px"></div>
+      </div>
+    </aside>
+
+    <section>
+      <div class="main-head">
+        <div>
+          <h1 id="catalogo">Relojes destacados</h1>
+          <p class="tiny">Explora, compara y verifica</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="btn small" id="btnOpenCam">Probar con cámara</button>
+          <button class="btn small" id="btnLocate">Enviar a mi ubicación</button>
+        </div>
+      </div>
+
+      <div class="viewer-wrap">
+        <div>
+          <div class="viewer" aria-label="Visor de reloj">
+            <canvas id="visor3D" width="380" height="380"></canvas>
+            <div class="controls" style="margin-top:8px;align-items:center">
+              <button class="small" id="resetView">Reset</button>
+              <button class="small" id="zoomIn">Zoom +</button>
+              <button class="small" id="zoomOut">Zoom -</button>
+              <div style="display:flex;flex-direction:column;gap:6px;background:rgba(255,255,255,0.6);padding:8px;border-radius:10px;">
+                <label style="font-size:13px">Rotación: <span id="rotOut">0°</span></label>
+                <input id="rot" type="range" min="0" max="360" value="0"/>
+                <label style="font-size:13px">Zoom: <span id="zoomOut">1x</span></label>
+                <input id="zoom" type="range" min="0.3" max="3" step="0.1" value="1"/>
+                <button id="spinToggle" class="small">Reanudar rotación</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;display:flex;gap:12px;align-items:center">
+            <div class="movements">
+              <div class="movement" id="mov-mecanico"><strong>Mecánico</strong><div class="tiny">(˶ᵔ ᵕ ᵔ˶)</div></div>
+              <div class="movement" id="mov-automatico"><strong>Automático</strong><div class="tiny">₍^. .^₎⟆</div></div>
+              <div class="movement" id="mov-cuarzo"><strong>Cuarzo</strong><div class="tiny">◝(ᵔᗜᵔ)◜</div></div>
+            </div>
+            <div style="flex:1"></div>
+          </div>
+
+        </div>
+
+        <aside style="display:flex;flex-direction:column;gap:12px">
+          <div class="card chart-card">
+            <h4>Historial de precios</h4>
+            <canvas id="priceChart" width="320" height="140"></canvas>
+          </div>
+
+          <div class="card wrist-meter">
+            <h4>Medidor de muñeca</h4>
+            <p class="tiny">Coloca la cinta sobre la pantalla o usa el modo virtual</p>
+            <canvas id="wristCanvas" width="300" height="80"></canvas>
+            <div style="display:flex;gap:8px"><input id="wristInput" placeholder="Medida mm" class="small" style="flex:1"/><button id="calcSize" class="btn small">Calcular talla</button></div>
+          </div>
+
+          <div class="card">
+            <h4>Generar certificado</h4>
+            <canvas id="certificado" width="600" height="800"></canvas>
+            <div style="display:flex;gap:8px;margin-top:8px"><button id="descCert" class="btn small">Descargar PNG</button><button id="printCert" class="btn small">Imprimir</button></div>
+          </div>
+        </aside>
+      </div>
+
+      <hr style="margin:18px 0;opacity:0.6" />
+
+      <div id="productos" class="grid"></div>
+
+      <div style="margin-top:18px;display:flex;gap:8px;align-items:center">
+        <button id="prevPage" class="btn small">Anterior</button>
+        <button id="nextPage" class="btn small">Siguiente</button>
+        <div style="margin-left:auto;color:#6b7280">Página <span id="pageNum">1</span></div>
+      </div>
+    </section>
+  </main>
+
+  
+  <div id="camModal" style="display:none">
+    <div class="overlay" id="camOverlay"></div>
+    <div class="dialog" role="dialog" aria-modal="true" id="camDialog" style="width:360px">
+      <h3>Probar reloj con cámara</h3>
+      <video id="camVideo" autoplay playsinline width="320" height="240" style="background:#f6f6f6;border-radius:8px;display:block"></video>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <button id="startCam" class="btn">Iniciar webcam</button>
+        <button id="takeSnap" class="btn secondary">Screenshot</button>
+        <button id="closeCam" class="btn">Cerrar</button>
+      </div>
+      <div class="tiny" id="wristRes" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  
+  <canvas id="certCanvas" width="1200" height="1600"></canvas>
+
+<script>
+
+const productosData = [
+  {id:1,marca:'Rolex',nombre:'Submariner',precio:120000,mov:'automático',año:2018,img:'https://cdn.shopify.com/s/files/1/0275/8420/0792/files/relojes_mecanicos_colombia_480x480.jpg?v=1703717502', desc:'Clásico diver.'},
+  {id:2,marca:'Omega',nombre:'Speedmaster',precio:80000,mov:'mecánico',año:2016,img:'https://ae-pic-a1.aliexpress-media.com/kf/Sc2d11f4adf064c98ad3dbd95e167c0a2A.jpg', desc:'Cronógrafo icónico.'},
+  {id:3,marca:'Cartier',nombre:'Tank',precio:65000,mov:'cuarzo',año:2021,img:'https://image3.nihaojewelry.com/fit-in/800x800/filters:quality(80)/filters:format(webp)/product/2025/7/10/1943203115138420736/Fashionable-Ladies-Quartz-Watch-New-Arrival-Student-Elegant-Simple-Small-Ins-Style-Alloy-Band-Round-Face-Jewelry-Clasp-0.jpg', desc:'Elegante y formal.'},
+  {id:4,marca:'Rolex',nombre:'Daytona',precio:220000,mov:'automático',año:2020,img:'https://highxtar.com/wp-content/uploads/2024/01/thumb-rolex-2024-subida-precios-uk-1440x1080.jpg', desc:'Racing legend.'},
+  {id:5,marca:'Omega',nombre:'Seamaster',precio:90000,mov:'automático',año:2019,img:'https://www.tissotwatches.com/dw/image/v2/BKKD_PRD/on/demandware.static/-/Library-Sites-Tissot-SharedLibrary/default/dwbd7f470f/2-PLP/1-PLP-BANNER/MOBILE/tis-digital-category-banner-mobile-pr100-lady.jpg', desc:'Marino y resistente.'},
+  {id:6,marca:'Patek',nombre:'Nautilus',precio:350000,mov:'automático',año:2022,img:'https://http2.mlstatic.com/D_NQ_NP_611264-MLM77475495724_072024-O-reloj-dama-mujer-elegante-casual-cuero-cuarzo-con-brazalete.webp', desc:'Alta relojería.'}
+];
+
+const LS_WISHLIST = 'glam_wishlist_v1';
+const LS_REVIEWS = 'glam_reviews_v1';
+const LS_CUSTOMIMGS = 'custom_images_v1';
+
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+let pagina = 1; const porPagina = 6;
+
+function loadCustomImages(){ try { return JSON.parse(localStorage.getItem(LS_CUSTOMIMGS))||{} } catch(e){return{}} }
+function saveCustomImages(o){ localStorage.setItem(LS_CUSTOMIMGS, JSON.stringify(o)); }
+
+function renderProductos(productos){
+  const custom = loadCustomImages();
+  const cont = $('#productos');
+  cont.innerHTML = productos.map(p=>`
+    <article class="card" draggable="true" data-id="${p.id}">
+      <div class="thumb"><img id="img-${p.id}" src="${custom[p.id]||p.img||''}" loading="lazy" alt="${p.nombre}"/></div>
+      <h4>${p.marca} — ${p.nombre}</h4>
+      <div class="tiny">${p.desc || ''}</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px">
+        <div style="flex:1">
+          <div class="meta"><div class="price">$${p.precio.toLocaleString()}</div></div>
+        </div>
+        <div style="min-width:220px">
+          <div style="display:flex;gap:6px;align-items:center">
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px;align-items:center">
+        <button class="btn" onclick="agregarAlCarrito(${p.id})">Agregar</button>
+        <button class="favorite" title="Favorito" onclick="toggleWishlist('${p.id}', this)">❤</button>
+        <button class="btn small" onclick="openReviews('${p.id}')">Reseñas</button>
+      </div>
+    </article>
+  `).join('');
+  attachDragDrop();
+  renderWishlistUI();
+}
+
+function paginarYRender(){
+  const start=(pagina-1)*porPagina; const end=start+porPagina;
+  const slice=productosData.slice(start,end);
+  renderProductos(slice);
+  $('#pageNum').textContent = pagina;
+}
+$('#nextPage').onclick=()=>{ if(pagina*porPagina<productosData.length){ pagina++; paginarYRender() } }
+$('#prevPage').onclick=()=>{ if(pagina>1){ pagina--; paginarYRender() } }
+paginarYRender();
+
+function actualizarImagen(id){
+  const val = document.getElementById(`imgInput-${id}`).value.trim();
+  if(!val){ mostrarNotificacion('Pega un enlace válido'); return }
+  const custom = loadCustomImages(); custom[id]=val; saveCustomImages(custom);
+  const imgEl = document.getElementById(`img-${id}`); if(imgEl) imgEl.src = val;
+  mostrarNotificacion('Imagen actualizada');
+}
+
+function attachDragDrop(){
+  document.querySelectorAll('[draggable="true"]').forEach(el=>{
+    el.addEventListener('dragstart',e=>{ e.dataTransfer.setData('text/plain',el.dataset.id); el.style.opacity=0.6 });
+    el.addEventListener('dragend',e=>{ el.style.opacity=''; });
+  });
+  const header = document.querySelector('header');
+  header.addEventListener('dragover',e=>e.preventDefault());
+  header.addEventListener('drop',e=>{ e.preventDefault(); const id=e.dataTransfer.getData('text/plain'); mostrarNotificacion('Arrastrado: '+id); });
+}
+
+function getCarrito(){ return JSON.parse(localStorage.getItem('carrito_v1'))||{items:[]} }
+function saveCarrito(c){ localStorage.setItem('carrito_v1', JSON.stringify(c)); updateBadge(); }
+function agregarAlCarrito(id){ const prod = productosData.find(p=>p.id===id); if(!prod) return; const car = getCarrito(); let it = car.items.find(i=>i.id===id); if(it){ it.cantidad++ } else { car.items.push({id:prod.id,nombre:prod.marca+' '+prod.nombre,precio:prod.precio,cantidad:1}) } saveCarrito(car); mostrarNotificacion('Agregado al carrito') }
+function updateBadge(){ const car = getCarrito(); const total = car.items.reduce((s,i)=>s+i.cantidad,0); document.getElementById('badge').textContent = total }
+updateBadge();
+
+
+function mostrarNotificacion(text){
+  const el = document.createElement('div'); el.textContent = text;
+  el.style.cssText='position:fixed;right:18px;bottom:18px;background:#fff;padding:10px;border-radius:10px;box-shadow:var(--sombra);z-index:9999';
+  document.body.appendChild(el); setTimeout(()=>el.remove(),2200);
+}
+
+
+document.querySelectorAll('[data-filter="marca"]').forEach(ch=>ch.addEventListener('change', applyFilters));
+document.querySelectorAll('input[name="mov"]').forEach(r=>r.addEventListener('change', applyFilters));
+document.getElementById('yearRange').addEventListener('input', e=>{ document.getElementById('yearVal').textContent = e.target.value; applyFilters(); });
+document.getElementById('limpiar-filtros').addEventListener('click', ()=>{ document.querySelectorAll('[data-filter="marca"]').forEach(c=>c.checked=false); document.querySelector('input[name="mov"][value="all"]').checked=true; document.getElementById('yearRange').value=2025; document.getElementById('yearVal').textContent=2025; applyFilters(); });
+
+function applyFilters(){
+  const marcas = Array.from(document.querySelectorAll('[data-filter="marca"]:checked')).map(i=>i.value);
+  const mov = document.querySelector('input[name="mov"]:checked').value;
+  const añoMax = +document.getElementById('yearRange').value;
+  let res = productosData.filter(p=>p.año<=añoMax);
+  if(marcas.length) res = res.filter(p=>marcas.includes(p.marca));
+  if(mov!=='all') res = res.filter(p=>p.mov===mov);
+  const q = document.getElementById('busqueda').value.trim().toLowerCase();
+  if(q) res = res.filter(p=>(`${p.marca} ${p.nombre}`).toLowerCase().includes(q));
+  renderProductos(res.slice((pagina-1)*porPagina, pagina*porPagina));
+}
+document.getElementById('busqueda').addEventListener('input', ()=>{ pagina=1; applyFilters(); });
+
+
+(function initVisor(){
+  const canvas = document.getElementById('visor3D'); const ctx = canvas.getContext('2d');
+  const rotInput = $('#rot'), zoomInput = $('#zoom');
+  let rot = 0, zoom = 1;
+  let dragging = false, lastX = 0;
+
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.save(); ctx.translate(canvas.width/2, canvas.height/2); ctx.scale(zoom,zoom); ctx.rotate(rot);
+    const r = Math.min(canvas.width, canvas.height) * 0.24;
+    
+    const grad = ctx.createLinearGradient(-r, -r, r, r); grad.addColorStop(0,'#fff'); grad.addColorStop(1,'#eef');
+    ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
+    
+    ctx.lineWidth = 12; ctx.strokeStyle = 'rgba(0,0,0,0.06)'; ctx.beginPath(); ctx.arc(0,0,r*1.15,0,Math.PI*2); ctx.stroke();
+    
+    ctx.strokeStyle = '#6666'; ctx.lineWidth = 2;
+    for(let i=0;i<12;i++){ const ang = i*Math.PI/6; ctx.beginPath(); ctx.moveTo(Math.cos(ang)*(r*0.75), Math.sin(ang)*(r*0.75)); ctx.lineTo(Math.cos(ang)*(r*0.9), Math.sin(ang)*(r*0.9)); ctx.stroke(); }
+    
+    const now = new Date(); const s = now.getSeconds() + now.getMilliseconds()/1000; const m = now.getMinutes() + s/60; const hh = (now.getHours()%12) + m/60;
+    
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--gold') || '#c59b6a'; ctx.lineWidth = 8; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.cos(hh/12*Math.PI*2 - Math.PI/2)*r*0.5, Math.sin(hh/12*Math.PI*2 - Math.PI/2)*r*0.5); ctx.stroke();
+   
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.cos(m/60*Math.PI*2 - Math.PI/2)*r*0.75, Math.sin(m/60*Math.PI*2 - Math.PI/2)*r*0.75); ctx.stroke();
+   
+    ctx.strokeStyle = '#ff5c5c'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.cos(s/60*Math.PI*2 - Math.PI/2)*r*0.9, Math.sin(s/60*Math.PI*2 - Math.PI/2)*r*0.9); ctx.stroke();
+    ctx.restore();
+  }
+
+  draw();
+  // interactions
+  $('#resetView').addEventListener('click', ()=>{ rot=0; zoom=1; $('#rot').value=0; $('#zoom').value=1; $('#rotOut').textContent='0°'; $('#zoomOut').textContent='1x'; draw(); });
+  $('#zoomIn').addEventListener('click', ()=>{ zoom=Math.min(3,zoom+0.2); $('#zoom').value=zoom; $('#zoomOut').textContent=zoom.toFixed(2)+'x'; draw(); });
+
+  $('#zoomOut').addEventListener('click', ()=>{ zoom=Math.max(0.3,zoom-0.2); $('#zoom').value=zoom; $('#zoomOut').textContent=zoom.toFixed(2)+'x'; draw(); });
+  $('#rot').addEventListener('input', e=>{ rot = Number(e.target.value) * Math.PI/180; $('#rotOut').textContent = e.target.value + '°'; draw(); });
+  $('#zoom').addEventListener('input', e=>{ zoom = Number(e.target.value); $('#zoomOut').textContent = Number(e.target.value).toFixed(2)+'x'; draw(); });
+
+    let spinning = false;
+  $('#spinToggle').addEventListener('click', ()=>{ spinning = !spinning; $('#spinToggle').textContent = spinning ? 'Pausar rotación' : 'Reanudar rotación'; });
+
+  function loop(){
+    if(spinning){ rot += 0.006; $('#rot').value = Math.round((rot*180/Math.PI)%360); $('#rotOut').textContent = Math.round((rot*180/Math.PI)%360)+'°'; }
+    draw(); requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+function drawPriceChart(sampleIdx=0){
+  const canvas = document.getElementById('priceChart'); const ctx = canvas.getContext('2d');
+  const data = productosData[sampleIdx].history || [100,120,130,140];
+  const w = canvas.width, h = canvas.height; ctx.clearRect(0,0,w,h);
+  const max = Math.max(...data), min = Math.min(...data);
+  ctx.beginPath();
+  data.forEach((v,i)=>{
+    const x = 20 + (i/(data.length-1))*(w-40);
+    const y = 20 + (1 - (v - min)/(max - min || 1))*(h-40);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    ctx.arc(x,y,2,0,Math.PI*2);
+  });
+  ctx.strokeStyle = 'rgba(122,167,255,0.95)'; ctx.lineWidth = 2; ctx.stroke();
+}
+if(productosData[0]) drawPriceChart(0);
+
+$('#calcSize').addEventListener('click', ()=>{
+  const mm = Number($('#wristInput').value) || Math.round(150 + Math.random()*60);
+  const talla = mm < 160 ? 'S' : mm < 180 ? 'M' : 'L';
+  $('#wristRes').textContent = `Medida estimada: ${mm} mm — talla ${talla} (simulado)`;
+});
+
+$('#descCert').addEventListener('click', ()=>{ alert('La función descarga de certificado está disponible en el módulo de certificados (simulado).'); });
+$('#printCert').addEventListener('click', ()=>{ alert('Imprimir: abre el generador de certificado (simulado).'); });
+
+const camModal = document.getElementById('camModal');
+const camVideo = document.getElementById('camVideo');
+let camStream = null;
+$('#btnOpenCam').addEventListener('click', ()=> openCamModal());
+function openCamModal(){
+  document.getElementById('camModal').style.display = 'block';
+  $('#camOverlay').style.display = 'block';
+  $('#camDialog').style.display = 'block';
+}
+$('#closeCam').addEventListener('click', ()=> closeCam());
+$('#startCam').addEventListener('click', async ()=>{
+  try{
+    camStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}})
+    camVideo.srcObject = camStream;
+  }catch(e){ alert('Webcam no disponible o permiso denegado'); }
+});
+$('#takeSnap').addEventListener('click', ()=>{
+   try{
+    const v = camVideo;
+    if(!v || v.readyState < 2) return alert('Inicia la webcam primero');
+    const w = v.videoWidth, h = v.videoHeight;
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const ctx = c.getContext('2d');
+    ctx.drawImage(v,0,0,w,h);
+      const r = Math.min(w,h)*0.22;
+    ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.beginPath(); ctx.arc(w/2, h/2, r,0,Math.PI*2); ctx.fill();
+    ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(200,200,255,0.9)'; ctx.beginPath(); ctx.arc(w/2,h/2,r*1.05,0,Math.PI*2); ctx.stroke();
+       ctx.strokeStyle = '#c59b6a'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(w/2,h/2); ctx.lineTo(w/2 + r*0.5, h/2); ctx.stroke();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(w/2,h/2); ctx.lineTo(w/2, h/2 - r*0.65); ctx.stroke();
+       const data = c.toDataURL('image/png');
+    const a = document.createElement('a'); a.href = data; a.download = `reloj-snap-${Date.now()}.png`; a.click();
+  }catch(e){ alert('Error al generar screenshot'); }
+});
+
+function closeCam(){
+  if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream = null; }
+  camVideo.srcObject = null;
+  document.getElementById('camModal').style.display = 'none';
+}
+
+
+function showInvDialog(){
+  const html = `<div style="max-width:420px"><h3>Calculadora de inversión</h3>
+    <label>Valor actual <input id="invVal" type="number" value="15000"></label><br/>
+    <label>Tasa anual (%) <input id="invRate" type="number" value="5"></label><br/>
+    <label>Años <input id="invYears" type="number" value="5"></label><br/>
+    <div style="margin-top:8px"><button id="invCalcDlg" class="btn">Calcular</button> <button id="invClose" class="btn small">Cerrar</button></div>
+    <div id="invOutDlg" class="tiny" style="margin-top:8px"></div>
+    <canvas id="invChart" width="380" height="120" style="margin-top:8px;border-radius:8px;background:#fff"></canvas>
+  </div>`;
+  const overlay = document.createElement('div'); overlay.className='overlay';
+  const dialog = document.createElement('div'); dialog.className='dialog'; dialog.innerHTML = html;
+  document.body.appendChild(overlay); document.body.appendChild(dialog);
+  dialog.querySelector('#invClose').addEventListener('click', ()=>{ overlay.remove(); dialog.remove(); });
+  dialog.querySelector('#invCalcDlg').addEventListener('click', ()=>{
+    const v = Number(dialog.querySelector('#invVal').value||0);
+    const r = Number(dialog.querySelector('#invRate').value||0)/100;
+    const y = Number(dialog.querySelector('#invYears').value||0);
+    const fut = Math.round(v * Math.pow(1+r, y));
+    dialog.querySelector('#invOutDlg').textContent = `Proyección: ${fut.toLocaleString('es-MX')} MXN en ${y} años (${(r*100).toFixed(2)}%)`;
+    // draw simple chart
+    const ctx = dialog.querySelector('#invChart').getContext('2d'); ctx.clearRect(0,0,380,120);
+    const arr = []; for(let i=0;i<=y;i++){ arr.push(Math.round(v*Math.pow(1+r,i))); }
+    const max = Math.max(...arr), min = Math.min(...arr);
+    ctx.beginPath(); arr.forEach((val,i)=>{ const x = 10 + i*(360/(arr.length-1)); const yy = 10 + (1-(val-min)/(max-min||1))*100; if(i===0) ctx.moveTo(x,yy); else ctx.lineTo(x,yy); ctx.arc(x,yy,2,0,Math.PI*2); });
+    ctx.strokeStyle = 'rgba(122,167,255,0.95)'; ctx.lineWidth = 2; ctx.stroke();
+  });
+}
+
+$('#btnLocate').addEventListener('click', showInvDialog);
+
+function getReviews(){ try { return JSON.parse(localStorage.getItem(LS_REVIEWS)) || {} } catch(e){ return {} } }
+function saveReviews(o){ localStorage.setItem(LS_REVIEWS, JSON.stringify(o)); }
+
+function openReviews(pid){
+  const reviews = getReviews()[pid] || [];
+  const html = `<div style="max-width:420px"><h3>Reseñas</h3>
+    <div id="reviewsList" style="max-height:240px;overflow:auto;margin-bottom:8px">${reviews.map(r=>`<div style="border-bottom:1px dashed #eee;padding:8px"><strong>${'★'.repeat(r.st)}</strong><div class="tiny">${escapeHtml(r.txt)}</div></div>`).join('') || '<div class="tiny">Sin reseñas</div>'}</div>
+    <label>Califica: <span id="starsInline" class="stars">${[1,2,3,4,5].map(i=>`<span class="star" data-i="${i}">☆</span>`).join('')}</span></label><br/>
+    <textarea id="revTxt" rows="3" style="width:100%;margin-top:6px" placeholder="Comentario (opcional)"></textarea>
+    <div style="margin-top:8px"><button id="saveRev" class="btn">Enviar reseña</button> <button id="closeRev" class="btn small">Cerrar</button></div>
+  </div>`;
+  const overlay = document.createElement('div'); overlay.className='overlay';
+  const dialog = document.createElement('div'); dialog.className='dialog'; dialog.innerHTML = html;
+  document.body.appendChild(overlay); document.body.appendChild(dialog);
+
+  let currentStars = 5;
+  dialog.querySelectorAll('.star').forEach(s=>{
+    s.addEventListener('click', e=>{
+      currentStars = Number(e.currentTarget.dataset.i);
+      dialog.querySelectorAll('.star').forEach(st=> st.textContent = (Number(st.dataset.i) <= currentStars ? '★' : '☆'));
+    });
+  });
+  dialog.querySelector('#closeRev').addEventListener('click', ()=>{ overlay.remove(); dialog.remove(); });
+  dialog.querySelector('#saveRev').addEventListener('click', ()=>{
+    const txt = dialog.querySelector('#revTxt').value.trim();
+    const all = getReviews(); all[pid] = all[pid] || []; all[pid].push({st: currentStars, txt, at: new Date().toISOString()}); saveReviews(all);
+    mostrarNotificacion('Reseña guardada');
+    overlay.remove(); dialog.remove();
+  });
+}
+
+function toggleWishlist(id, btn){
+  const arr = JSON.parse(localStorage.getItem(LS_WISHLIST)) || [];
+  const idx = arr.indexOf(id);
+  if(idx >= 0){ arr.splice(idx,1); btn.classList.remove('pop') } else { arr.push(id); btn.classList.add('pop'); setTimeout(()=>btn.classList.remove('pop'),220) }
+  localStorage.setItem(LS_WISHLIST, JSON.stringify(arr));
+  renderWishlistUI();
+}
+function renderWishlistUI(){
+  const arr = JSON.parse(localStorage.getItem(LS_WISHLIST)) || [];
+  // highlight hearts
+  $$('.favorite').forEach(b=>{
+    const card = b.closest('.card'); const id = card?.dataset?.id;
+    if(id && arr.includes(id)) b.style.color = 'var(--accent-2)'; else b.style.color = '#888';
+  });
+}
+
+
+function softBeep(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type='sine'; o.frequency.value = 880; g.gain.value = 0.02;
+    o.connect(g); g.connect(ctx.destination); o.start(); setTimeout(()=> { o.stop(); ctx.close(); }, 120);
+  }catch(e){}
+}
+
+
+function placeholderDataURI(text){ const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400'><rect width='100%' height='100%' fill='#fff7fb'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#d29fb8' font-size='26' font-family='sans-serif'>${escapeHtml(text)}</text></svg>`; return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); }
+
+document.addEventListener('DOMContentLoaded', ()=>{
+   drawPriceChart();
+  renderWishlistUI();
+});
+
+$('#verificarSerial').addEventListener('click', ()=>{
+  const s = $('#inputSerial').value.trim();
+  if(!s) return $('#serialResult').textContent = 'Introduce un número de serie.';
+  // simulación: acepta si empieza con ES- o GLAM-
+  const ok = /^ES-|^GLAM-/.test(s);
+  $('#serialResult').textContent = ok ? 'Serie válida (simulado)' : 'No reconocido (simulado)';
+});
+
+window.addEventListener('load', ()=>{ $$('img').forEach(img=>{ if(img.dataset && img.dataset.src){ img.src = img.dataset.src } }) });
+
+</script>
+</body>
+</html>
